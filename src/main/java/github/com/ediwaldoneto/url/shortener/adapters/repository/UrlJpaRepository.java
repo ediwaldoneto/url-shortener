@@ -36,4 +36,9 @@ public class UrlJpaRepository implements UrlRepository {
     public Optional<Url> findByOriginalUrl(String url) {
         return repository.findByOriginalUrl(url);
     }
+
+    @Override
+    public Optional<Url> findByShortUrl(String shortUrl) {
+        return repository.findByShortUrl(shortUrl);
+    }
 }

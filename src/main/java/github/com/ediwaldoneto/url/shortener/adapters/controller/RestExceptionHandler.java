@@ -1,5 +1,6 @@
 package github.com.ediwaldoneto.url.shortener.adapters.controller;
 
+import github.com.ediwaldoneto.url.shortener.application.exception.InvalidUrlException;
 import github.com.ediwaldoneto.url.shortener.application.exception.ShortenerException;
 import github.com.ediwaldoneto.url.shortener.application.exception.UrlNotFound;
 import org.springframework.http.ProblemDetail;
@@ -16,7 +17,12 @@ public class RestExceptionHandler {
 
 
     @ExceptionHandler(UrlNotFound.class)
-    public ProblemDetail handleUrlNotFoundExceptionException(UrlNotFound e) {
+    public ProblemDetail handleUrlNotFoundException(UrlNotFound e) {
+        return e.toProblemDetail();
+    }
+
+    @ExceptionHandler(InvalidUrlException.class)
+    public ProblemDetail handleUrlInvalidUrlException(InvalidUrlException e) {
         return e.toProblemDetail();
     }
 }

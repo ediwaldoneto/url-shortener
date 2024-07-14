@@ -3,7 +3,9 @@ package github.com.ediwaldoneto.url.shortener.application.service;
 import github.com.ediwaldoneto.url.shortener.adapters.repository.UrlJpaRepository;
 import github.com.ediwaldoneto.url.shortener.application.dto.UrlRequest;
 import github.com.ediwaldoneto.url.shortener.application.dto.UrlResponse;
+import github.com.ediwaldoneto.url.shortener.application.exception.InvalidUrlException;
 import github.com.ediwaldoneto.url.shortener.application.exception.ShortenerException;
+import github.com.ediwaldoneto.url.shortener.application.exception.UrlNotFound;
 import github.com.ediwaldoneto.url.shortener.domain.model.Url;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,12 +42,13 @@ public class UrlService {
     public UrlResponse shortenUrl(final UrlRequest request) {
         try {
             final Optional<Url> byOriginalUrl = urlJpaRepository.findByOriginalUrl(request.getUrl());
-            if (byOriginalUrl.isPresent() && !isExpired(byOriginalUrl.get())) {
+            if (byOriginalUrl.isPresent() && isExpired(byOriginalUrl.get())) {
                 return new UrlResponse(baseUrl + byOriginalUrl.get().getShortUrl());
             }
-            final Url url = Url.newUrl(request.getUrl(), generateShortenedUrl(request.getUrl()), expirationDate);
+            final String shortUrl = baseUrl + generateShortenedUrl(request.getUrl());
+            final Url url = Url.newUrl(request.getUrl(), shortUrl, expirationDate);
             urlJpaRepository.save(url);
-            return new UrlResponse(baseUrl + url.getShortUrl());
+            return new UrlResponse(shortUrl);
         } catch (Exception e) {
             throw new ShortenerException();
         }
@@ -62,6 +65,24 @@ public class UrlService {
     }
 
     public boolean isExpired(Url url) {
-        return url.getExpirationDate().isBefore(LocalDateTime.now());
+        return !url.getExpirationDate().isBefore(LocalDateTime.now());
+    }
+
+    public UrlResponse getUrl(final String url) {
+        try {
+            if (url.contains(baseUrl)) {
+                final Optional<Url> byShortUrl = urlJpaRepository.findByShortUrl(url);
+                if (byShortUrl.isPresent() && isExpired(byShortUrl.get())) {
+                    return new UrlResponse(byShortUrl.get().getShortUrl());
+                } else {
+                    throw new UrlNotFound();
+                }
+
+            } else {
+                throw new InvalidUrlException();
+            }
+        } catch (Exception e) {
+            throw new ShortenerException();
+        }
     }
 }

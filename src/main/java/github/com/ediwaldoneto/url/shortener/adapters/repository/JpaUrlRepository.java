@@ -13,5 +13,5 @@ public interface JpaUrlRepository extends JpaRepository<Url, String> {
 
     List<Url> findByExpirationDateBefore(LocalDateTime dateTime);
 
-
+    Optional<Url> findByShortUrl(String shortUrl);
 }

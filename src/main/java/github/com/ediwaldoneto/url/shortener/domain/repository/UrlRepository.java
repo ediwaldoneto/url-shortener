@@ -15,4 +15,6 @@ public interface UrlRepository {
     List<Url> findByExpirationDateBefore(final LocalDateTime dateTime);
 
     Optional<Url> findByOriginalUrl(String url);
+
+    Optional<Url> findByShortUrl(String shortUrl);
 }
