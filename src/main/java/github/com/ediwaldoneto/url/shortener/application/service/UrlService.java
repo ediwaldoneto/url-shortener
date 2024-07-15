@@ -43,7 +43,7 @@ public class UrlService {
         try {
             final Optional<Url> byOriginalUrl = urlJpaRepository.findByOriginalUrl(request.getUrl());
             if (byOriginalUrl.isPresent() && isExpired(byOriginalUrl.get())) {
-                return new UrlResponse(baseUrl + byOriginalUrl.get().getShortUrl());
+                return new UrlResponse(byOriginalUrl.get().getShortUrl());
             }
             final String shortUrl = baseUrl + generateShortenedUrl(request.getUrl());
             final Url url = Url.newUrl(request.getUrl(), shortUrl, expirationDate);
@@ -70,7 +70,7 @@ public class UrlService {
 
     public UrlResponse getUrl(final String url) {
         try {
-            if (url.contains(baseUrl)) {
+            if (url.contains(baseUrl) || url.contains("www.")) {
                 final Optional<Url> byShortUrl = urlJpaRepository.findByShortUrl(url);
                 if (byShortUrl.isPresent() && isExpired(byShortUrl.get())) {
                     return new UrlResponse(byShortUrl.get().getShortUrl());
