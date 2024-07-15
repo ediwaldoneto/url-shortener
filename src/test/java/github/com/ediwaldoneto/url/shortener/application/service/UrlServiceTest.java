@@ -3,6 +3,8 @@ package github.com.ediwaldoneto.url.shortener.application.service;
 import github.com.ediwaldoneto.url.shortener.adapters.repository.UrlJpaRepository;
 import github.com.ediwaldoneto.url.shortener.application.dto.UrlRequest;
 import github.com.ediwaldoneto.url.shortener.application.dto.UrlResponse;
+import github.com.ediwaldoneto.url.shortener.application.exception.InvalidUrlException;
+import github.com.ediwaldoneto.url.shortener.application.exception.UrlNotFound;
 import github.com.ediwaldoneto.url.shortener.domain.model.Url;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,5 +70,29 @@ class UrlServiceTest {
 
         assertNotNull(response);
         assertEquals("http://short.url/abcde", response.getUrl());
+    }
+
+    @Test
+    void testGetUrl() {
+        Url url = Url.newUrl("http://example.com", "http://short.url/abcde", 7L);
+
+        when(urlJpaRepository.findByShortUrl(anyString())).thenReturn(Optional.of(url));
+
+        UrlResponse response = urlService.getUrl("http://short.url/abcde");
+
+        assertNotNull(response);
+        assertEquals("http://short.url/abcde", response.getUrl());
+    }
+
+    @Test
+    void testGetUrlNotFound() {
+        when(urlJpaRepository.findByShortUrl(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(UrlNotFound.class, () -> urlService.getUrl("http://short.url/abcde"));
+    }
+
+    @Test
+    void testGetUrlInvalid() {
+        assertThrows(InvalidUrlException.class, () -> urlService.getUrl("http://invalid.url/abcde"));
     }
 }

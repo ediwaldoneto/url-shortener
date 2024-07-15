@@ -69,20 +69,17 @@ public class UrlService {
     }
 
     public UrlResponse getUrl(final String url) {
-        try {
-            if (url.contains(baseUrl) || url.contains("www.")) {
-                final Optional<Url> byShortUrl = urlJpaRepository.findByShortUrl(url);
-                if (byShortUrl.isPresent() && isExpired(byShortUrl.get())) {
-                    return new UrlResponse(byShortUrl.get().getShortUrl());
-                } else {
-                    throw new UrlNotFound();
-                }
 
+        if (url.contains(baseUrl)) {
+            final Optional<Url> byShortUrl = urlJpaRepository.findByShortUrl(url);
+            if (byShortUrl.isPresent() && isExpired(byShortUrl.get())) {
+                return new UrlResponse(byShortUrl.get().getShortUrl());
             } else {
-                throw new InvalidUrlException();
+                throw new UrlNotFound();
             }
-        } catch (Exception e) {
-            throw new ShortenerException();
+        } else {
+            throw new InvalidUrlException();
         }
+
     }
 }
